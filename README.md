@@ -190,7 +190,7 @@ function UserList() {
 
 Built-in interpreter for standard REST API responses. Supports:
 
-- **Ember REST Adapter format**
+- **[Ember REST Adapter](https://api.emberjs.com/ember-data/release/classes/restadapter) format**
 - **[fastapi-cruddy-framework](https://github.com/mdconaway/fastapi-cruddy-framework) format**
 - Custom pluralized resource names
 
