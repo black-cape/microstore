@@ -386,6 +386,150 @@ function UserProfile({ userId }: { userId: string }) {
 
 Your `deserialize` function receives a POJO (plain old javascript object) format object _after_ it has already been run through `tinybase` field level `deserialize` functions. (So your arrays will be arrays, objects will be objects, etc) You can then take this simple POJO record and transform it into more complex types that cannot be represented in raw JSON, like class instances, dates, etc. If you create a `zod`-based deserialize function, the expectation of the correlated `serialize` method handler would be to receive a record object in its `zod` format, and to then convert it into its pure POJO format before it is then delegated to the final field-level transformers before being pushed into `tinybase` for reactivity.
 
+### Generating Schemas with ZodSchematizer
+
+You can automatically generate MicroStore schemas from Zod models using TinyBase's [ZodSchematizer](https://tinybase.org/api/schematizer-zod/interfaces/schematizer/zodschematizer/):
+
+```bash
+# Install the ZodSchematizer
+npm install tinybase schematizer-zod zod
+```
+
+```typescript
+import { z } from 'zod';
+import { createZodSchematizer } from 'schematizer-zod';
+
+// Define your Zod models
+const UserZodModel = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  name: z.string(),
+  age: z.number().min(0).max(120),
+  isActive: z.boolean(),
+  createdAt: z.date(), // Date object in application
+  preferences: z.object({
+    theme: z.enum(['light', 'dark']),
+    notifications: z.boolean()
+  }),
+  tags: z.array(z.string())
+});
+
+const PostZodModel = z.object({
+  id: z.string(),
+  title: z.string(),
+  content: z.string(),
+  userId: z.string(),
+  publishedAt: z.date().nullable(),
+  metadata: z.object({
+    readTime: z.number(),
+    wordCount: z.number()
+  })
+});
+
+// Create the ZodSchematizer
+const schematizer = createZodSchematizer({
+  user: UserZodModel,
+  post: PostZodModel
+});
+
+// Generate base TinyBase schemas
+const baseTinyBaseSchemas = schematizer.getTablesSchema();
+
+// Define custom field transforms for complex types
+const customFieldTransforms = {
+  date: {
+    // serialize: convert Date object to ISO string for TinyBase storage
+    serialize: (value: Date) => value.toISOString(),
+    // deserialize: convert ISO string back to Date object for application use
+    deserialize: (value: string) => new Date(value)
+  }
+};
+
+// Convert to MicroStore schemas by adding MicroStore-specific properties
+const microStoreSchemas = {
+  user: {
+    ...baseTinyBaseSchemas.user,
+    // Override the id field to mark it as primary key
+    id: { ...baseTinyBaseSchemas.user.id, primaryKey: true },
+    // Add transforms for complex fields
+    createdAt: { type: 'string', transform: 'date' }, // Use custom date transform
+    preferences: { type: 'string', transform: 'json' },
+    tags: { type: 'string', transform: 'json' }
+  },
+  post: {
+    ...baseTinyBaseSchemas.post,
+    // Override the id field to mark it as primary key
+    id: { ...baseTinyBaseSchemas.post.id, primaryKey: true },
+    // Add transforms for complex fields
+    publishedAt: { type: 'string', transform: 'date' }, // Use custom date transform
+    metadata: { type: 'string', transform: 'json' }
+  }
+} as const;
+
+// Create MicroStore with generated schemas and custom transforms
+const store = new MicroStore({
+  schemas: microStoreSchemas,
+  fieldTransforms: customFieldTransforms, // Add custom field transforms
+  recordTransforms: {
+    user: {
+      // serialize: receives Zod model instance, returns POJO for TinyBase storage
+      serialize: (user: z.infer<typeof UserZodModel>) => {
+        // Convert Zod model to plain object
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          age: user.age,
+          isActive: user.isActive,
+          createdAt: user.createdAt, // Date object - will be converted by field transform
+          preferences: user.preferences,
+          tags: user.tags
+        };
+      },
+      // deserialize: receives POJO from TinyBase, returns Zod-validated model
+      deserialize: (data: any) => {
+        return UserZodModel.parse(data); // createdAt will be Date object from field transform
+      }
+    },
+    post: {
+      // serialize: receives Zod model instance, returns POJO for TinyBase storage
+      serialize: (post: z.infer<typeof PostZodModel>) => {
+        // Convert Zod model to plain object
+        return {
+          id: post.id,
+          title: post.title,
+          content: post.content,
+          userId: post.userId,
+          publishedAt: post.publishedAt, // Date object - will be converted by field transform
+          metadata: post.metadata
+        };
+      },
+      // deserialize: receives POJO from TinyBase, returns Zod-validated model
+      deserialize: (data: any) => {
+        return PostZodModel.parse(data); // publishedAt will be Date object from field transform
+      }
+    }
+  }
+});
+```
+
+**Benefits of ZodSchematizer:**
+
+- **Automatic Schema Generation**: Convert Zod models directly to TinyBase/MicroStore schemas
+- **Type Consistency**: Ensure your validation schemas match your storage schemas
+- **Reduced Boilerplate**: Less manual schema definition
+- **Schema Evolution**: Update Zod models and regenerate schemas automatically
+- **Validation Integration**: Natural integration between Zod validation and MicroStore storage
+
+**Workflow:**
+
+1. Define your domain models using Zod schemas
+2. Use ZodSchematizer to generate base TinyBase schemas
+3. Create custom field transforms for complex types (Date, etc.)
+4. Enhance generated schemas with MicroStore properties (`primaryKey`, `transform`)
+5. Add record transforms with serialize returning POJOs and deserialize returning validated models
+6. Create MicroStore instance with enhanced schemas and field transforms
+
 ### Custom Interpreters
 
 Create custom interpreters for non-standard API formats:
