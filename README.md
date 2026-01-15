@@ -191,7 +191,7 @@ function UserList() {
 Built-in interpreter for standard REST API responses. Supports:
 
 - **Ember REST Adapter format**
-- **fastapi-cruddy-framework format**
+- **[fastapi-cruddy-framework](https://github.com/mdconaway/fastapi-cruddy-framework) format**
 - Custom pluralized resource names
 
 ```typescript
@@ -275,7 +275,116 @@ const recordTransforms = {
 };
 ```
 
-- You can also use record transforms to integrate other libraries like [zod](https://zod.dev/) to route serialized record data through a `zod` transformation before you receive a record in your components. Your `deserialize` function will receive a POJO (plain old javascript object) format object <i>after</i> it has already been run through `tinybase` field level `deserialize` functions. (So your arrays will be arrays, objects will be objects, etc) You can then take this simple POJO record and transform it into more complex types that cannot be represented in raw JSON, like class instances, dates, etc. If you create a `zod`-based deserialize function, the expection of the correlated `serialize` method handler would be to receive a record object in its `zod` format, and to then convert it into its pure POJO format before it is then delegated to the final field-level transformers before being pushed into `tinybase` for reactivity.
+### Practical Zod Integration Example
+
+You can use record transforms to integrate [Zod](https://zod.dev/) for robust type validation and transformation:
+
+```typescript
+import { z } from 'zod';
+
+// Define Zod schema for validation and type inference
+const UserSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  name: z.string(),
+  createdAt: z.date(),
+  preferences: z.object({
+    theme: z.enum(['light', 'dark']),
+    notifications: z.boolean()
+  }),
+  // Computed properties available only in class instances
+  getDisplayName: z.function().returns(z.string()).optional()
+});
+
+// Create a User class with methods
+class User {
+  constructor(
+    public id: string,
+    public email: string,
+    public name: string,
+    public createdAt: Date,
+    public preferences: { theme: 'light' | 'dark'; notifications: boolean }
+  ) {}
+
+  getDisplayName(): string {
+    return `${this.name} (${this.email})`;
+  }
+
+  toJSON() {
+    // Convert class instance to plain object for API serialization
+    return {
+      id: this.id,
+      email: this.email,
+      name: this.name,
+      createdAt: this.createdAt,
+      preferences: this.preferences
+    };
+  }
+
+  static fromJSON(data: any): User {
+    // Validate and create User instance from plain object
+    const validated = UserSchema.omit({ getDisplayName: true }).parse(data);
+    return new User(
+      validated.id,
+      validated.email,
+      validated.name,
+      validated.createdAt,
+      validated.preferences
+    );
+  }
+}
+
+// Configure record transforms with Zod validation
+const recordTransforms = {
+  user: {
+    // serialize: receives User class instance, returns plain object for TinyBase storage
+    serialize: (user: User) => {
+      return user.toJSON(); // Convert class instance to POJO
+    },
+    // deserialize: receives POJO from TinyBase, returns User class instance for components
+    deserialize: (userData: any) => {
+      return User.fromJSON(userData); // Validate and convert to class instance
+    }
+  }
+};
+
+// Configure MicroStore with Zod-powered transforms
+const store = new MicroStore({
+  schemas: {
+    user: {
+      id: { type: 'string', primaryKey: true },
+      email: { type: 'string' },
+      name: { type: 'string' },
+      createdAt: { type: 'string', transform: 'json' }, // Dates serialized as ISO strings
+      preferences: { type: 'string', transform: 'json' } // Objects serialized as JSON
+    }
+  },
+  recordTransforms
+});
+
+// Usage in components - you receive fully validated User class instances
+function UserProfile({ userId }: { userId: string }) {
+  const user = store.peekRecord<User>('user', userId);
+
+  return (
+    <div>
+      <h1>{user?.getDisplayName()}</h1> {/* Class method available */}
+      <p>Theme: {user?.preferences.theme}</p>
+      <p>Notifications: {user?.preferences.notifications ? 'On' : 'Off'}</p>
+    </div>
+  );
+}
+```
+
+**Benefits of Zod Integration:**
+
+- **Runtime Validation**: Ensures data integrity when deserializing from storage
+- **Type Safety**: Full TypeScript support with inferred types
+- **Class Methods**: Enable rich domain models with behavior, not just data
+- **Error Handling**: Automatic validation errors for malformed data
+- **Schema Evolution**: Easy to update schemas as your API evolves
+
+Your `deserialize` function receives a POJO (plain old javascript object) format object _after_ it has already been run through `tinybase` field level `deserialize` functions. (So your arrays will be arrays, objects will be objects, etc) You can then take this simple POJO record and transform it into more complex types that cannot be represented in raw JSON, like class instances, dates, etc. If you create a `zod`-based deserialize function, the expectation of the correlated `serialize` method handler would be to receive a record object in its `zod` format, and to then convert it into its pure POJO format before it is then delegated to the final field-level transformers before being pushed into `tinybase` for reactivity.
 
 ### Custom Interpreters
 
