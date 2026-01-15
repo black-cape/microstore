@@ -4,7 +4,7 @@
 
 **A powerful TypeScript React data normalization library that provides a single source of truth for your application state.**
 
-MicroStore is an abstract data normalization layer for React projects that eliminates data duplication across AJAX / fetch requests and provides reactive access to normalized records. Built on [TinyBase](https://tinybase.org/), it automatically interprets REST API responses and maintains a consistent, normalized data record layer that your UI can reactively subscribe to. Each component using the rectivity layer still receives immutable copies of each record, but they will always be in sync.
+MicroStore is an abstract data normalization layer for React projects that eliminates data duplication across AJAX / fetch requests and provides reactive access to normalized records. Built on [TinyBase](https://tinybase.org/), it automatically interprets REST API responses and maintains a consistent, normalized data record layer that your UI can reactively subscribe to. Each component using the reactivity layer still receives immutable copies of each record, but they will always be in sync.
 
 ## 🚀 Features
 
