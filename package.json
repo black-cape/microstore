@@ -1,0 +1,61 @@
+{
+  "name": "microstore",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "tsc --noEmit --pretty",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "test:compatibility": "node test-compatibility.js",
+    "clean": "rm -rf dist",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [],
+  "authors": [
+    {
+      "name": "Michael Conaway",
+      "email": "mdconaway@noreply.github.com"
+    }
+  ],
+  "organization": {
+    "name": "Black Cape",
+    "url": "https://github.com/black-cape"
+  },
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ember-inflector": "^6.0.0",
+    "lodash-es": "^4.17.22",
+    "tinybase": ">=5.4.9"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-compiler-runtime": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "prettier": "^3.8.0",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}

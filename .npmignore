@@ -1,0 +1,7 @@
+node_modules
+.npmignore
+.pre-commit-config-yaml
+.prettierignore
+.prettierrc
+test-compatibility.js
+CONTRIBUTING.md
