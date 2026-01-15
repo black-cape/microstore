@@ -495,13 +495,13 @@ const api = ky.create({
 
 ### Schema Options
 
-| Property      | Type                                | Description                     |
-| ------------- | ----------------------------------- | ------------------------------- |
-| `type`        | `'string' \| 'number' \| 'boolean'` | Field data type                 |
-| `primaryKey?` | `boolean`                           | Mark field as primary key       |
-| `transform?`  | `string`                            | Apply named transform to field  |
-| `default?`    | `any`                               | Default value for field         |
-| `allowNull?`  | `boolean`                           | Available if using tinybase > 5 |
+| Property      | Type                                | Description                      |
+| ------------- | ----------------------------------- | -------------------------------- |
+| `type`        | `'string' \| 'number' \| 'boolean'` | Field data type                  |
+| `primaryKey?` | `boolean`                           | Mark field as primary key        |
+| `transform?`  | `string`                            | Apply named transform to field   |
+| `default?`    | `any`                               | Default value for field          |
+| `allowNull?`  | `boolean`                           | Available if using tinybase >= 7 |
 
 ## 📋 TODO
 
