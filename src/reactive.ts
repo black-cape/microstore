@@ -57,7 +57,7 @@ export function useReactive<T>(type: string, data: T[] | string[]): T[] {
 
   // Why is this effect important? Because you ONLY want to update the thing
   // that is bubbling out new rows (the query) if the supporting REST request
-  // with its own internal IDs has changed. We
+  // with its own internal IDs has changed.
   useEffect(() => {
     if (queries) {
       const filter = generateFilter(data, pk);
