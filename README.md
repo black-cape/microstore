@@ -19,11 +19,11 @@ MicroStore is an abstract data normalization layer for React projects that elimi
 ## 📦 Installation
 
 ```bash
-npm install @blackcape/microstore
+npm install @black-cape/microstore
 # or
-yarn add @blackcape/microstore
+yarn add @black-cape/microstore
 # or
-pnpm add @blackcape/microstore
+pnpm add @black-cape/microstore
 ```
 
 ## ⚛️ React Compatibility
