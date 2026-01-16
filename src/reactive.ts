@@ -1,21 +1,14 @@
-// This software is provided to the United States Government (USG) with SBIR Data Rights as defined at Federal Acquisition Regulation 52.227-14, "Rights in Data-SBIR Program" (May 2014) SBIR Rights Notice (Dec 2026) These SBIR data are furnished with SBIR rights under Contract No. H9241522D0001. For a period of 19 years, unless extended in accordance with FAR 27.409(h), after acceptance of all items to be delivered under this contract, the Government will use these data for Government purposes only, and they shall not be disclosed outside the Government (including disclosure for procurement purposes) during such period without permission of the Contractor, except that, subject to the foregoing use and disclosure prohibitions, these data may be disclosed for use by support Contractors. After the protection period, the Government has a paid-up license to use, and to authorize others to use on its behalf, these data for Government purposes, but is relieved of all disclosure prohibitions and assumes no liability for unauthorized use of these data by third parties. This notice shall be affixed to any reproductions of these data, in whole or in part.
-// This whole file will get "genericized" so that it can wrap any useQuery that we currently use
-// Right now it is hard coded to do object stuff...
-// The same logic can be made more abstract and receive a couple more
-// arguments to then handle ANYTHING. :)
 import { useEffect, useRef, useState } from 'react';
 import { type Queries } from 'tinybase';
 import { useQueries, useResultTable } from 'tinybase/ui-react';
 import { useMicroStore } from './provider';
 import type { MicroStoreSchema } from './types';
 
-const directIds = new Set(['string', 'number']);
-
 function generateFilter(data: any[] | undefined, pk: string) {
   return new Set(
     data
       ? data.map((obj) => {
-          if (directIds.has(typeof obj)) {
+          if (typeof obj === 'string') {
             return obj;
           }
           return obj[pk];
@@ -30,7 +23,7 @@ function resetQueryDefinition(
   pk: string,
   queryName: string,
   queries: Queries,
-  filter: Set<string | number>
+  filter: Set<string>
 ) {
   // So what exactly does this do? It returns all the same tinybase rows that are
   // returned by the same React query being referenced by this reactive wrapper!!
@@ -41,13 +34,13 @@ function resetQueryDefinition(
     Object.keys(schema).forEach((k) => {
       select(k);
     });
-    where((getCell) => filter.has(<string | number>getCell(pk)));
+    where((getCell) => filter.has(<string>getCell(pk)));
   });
 }
 
 // Wrap the objects in tinybase rows to make them react at a record level
 // to individual record changes
-export function useReactive<T>(type: string, data: T[] | string[] | number[]): T[] {
+export function useReactive<T>(type: string, data: T[] | string[]): T[] {
   const store = useMicroStore();
   const schema = store?.getSchema(type);
   const pk = store?.getPrimaryKey(type);
@@ -68,7 +61,7 @@ export function useReactive<T>(type: string, data: T[] | string[] | number[]): T
   useEffect(() => {
     if (queries) {
       const filter = generateFilter(data, pk);
-      const stringifiedFilter = JSON.stringify(filter);
+      const stringifiedFilter = JSON.stringify([...filter]);
       if (lastFilter !== stringifiedFilter && airBrake.current !== stringifiedFilter) {
         if (Object.entries(rows).length > 0) {
           airBrake.current = stringifiedFilter;
@@ -83,7 +76,7 @@ export function useReactive<T>(type: string, data: T[] | string[] | number[]): T
   const effectiveTransformer = transformer ? transformer.deserialize : (x: any) => x;
   const returnData: T[] = [];
   data.forEach((item: any) => {
-    const identifier = directIds.has(typeof item) ? item : item[pk];
+    const identifier = typeof item === 'string' ? item : item[pk];
     const possibleRow = rows[identifier];
     if (possibleRow) {
       const thing: any = store?.deserialize(possibleRow, schema);

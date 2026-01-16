@@ -1,3 +1,7 @@
+### [0.0.4]
+
+- Remove numeric primary keys as an option from `useReactive`, as the underlying `tinybase` data constructs don't actually index with numbers (uses string)
+
 ### [0.0.3]
 
 - Refactor `useReactive` to support receiving an array of raw data from an http request, or an array of `string` or `number` ids, or a mixed array. This allows components to easily add reactive records to their rendering tree without directly interacting with HTTP methods.
