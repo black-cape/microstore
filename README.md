@@ -53,7 +53,7 @@ npm run test:compatibility
 ### 1. Define Your Schemas
 
 ```typescript
-import { MicroStore, MicroStoreProvider, useReactive } from 'microstore';
+import { MicroStore, MicroStoreProvider, useReactive } from '@black-cape/microstore';
 
 // Define your data schemas
 const schemas = {
@@ -77,7 +77,7 @@ const schemas = {
 ### 2. Setup the Provider
 
 ```typescript
-import { MicroStore, MicroStoreProvider } from 'microstore';
+import { MicroStore, MicroStoreProvider } from '@black-cape/microstore';
 
 const store = new MicroStore({ schemas });
 
@@ -94,7 +94,7 @@ function App() {
 
 ```typescript
 import { useQuery } from '@tanstack/react-query';
-import { useReactive, useMicroStore } from 'microstore';
+import { useReactive, useMicroStore } from '@black-cape/microstore';
 
 function UserList() {
   const store = useMicroStore();
