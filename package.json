@@ -20,7 +20,28 @@
     "prepare": "npm run build",
     "prepublishOnly": "npm run clean && npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "react",
+    "typescript",
+    "state-management",
+    "data-normalization",
+    "normalizer",
+    "reactive",
+    "store",
+    "rest",
+    "api",
+    "crud",
+    "tinybase",
+    "single-source-of-truth",
+    "react-hooks",
+    "cache",
+    "orm",
+    "immutable",
+    "real-time",
+    "rest-envelope"
+  ],
+  "homepage": "https://github.com/black-cape/microstore",
+  "repository": "https://github.com/black-cape/microstore",
   "authors": [
     {
       "name": "Michael Conaway",
