@@ -5,3 +5,4 @@ node_modules
 .prettierrc
 test-compatibility.js
 CONTRIBUTING.md
+local.env
