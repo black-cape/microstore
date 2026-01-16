@@ -81,7 +81,7 @@ type WithExistingStore = {
 };
 declare function MicroStoreProvider(props: WithExistingStore): react_jsx_runtime.JSX.Element;
 
-declare function useReactive<T>(type: string, data: T[] | string[] | number[]): T[];
+declare function useReactive<T>(type: string, data: T[] | string[]): T[];
 
 declare const json: FieldTransform;
 
