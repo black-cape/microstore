@@ -9,8 +9,19 @@ import { useQueries, useResultTable } from 'tinybase/ui-react';
 import { useMicroStore } from './provider';
 import type { MicroStoreSchema } from './types';
 
+const directIds = new Set(['string', 'number']);
+
 function generateFilter(data: any[] | undefined, pk: string) {
-  return data ? data.map((obj) => obj[pk]) : [];
+  return new Set(
+    data
+      ? data.map((obj) => {
+          if (directIds.has(typeof obj)) {
+            return obj;
+          }
+          return obj[pk];
+        })
+      : []
+  );
 }
 
 function resetQueryDefinition(
@@ -19,7 +30,7 @@ function resetQueryDefinition(
   pk: string,
   queryName: string,
   queries: Queries,
-  filter: string[]
+  filter: Set<string | number>
 ) {
   // So what exactly does this do? It returns all the same tinybase rows that are
   // returned by the same React query being referenced by this reactive wrapper!!
@@ -30,13 +41,13 @@ function resetQueryDefinition(
     Object.keys(schema).forEach((k) => {
       select(k);
     });
-    where((getCell) => filter.includes(<string>getCell(pk)));
+    where((getCell) => filter.has(<string | number>getCell(pk)));
   });
 }
 
 // Wrap the objects in tinybase rows to make them react at a record level
 // to individual record changes
-export function useReactive<T>(type: string, data: T[]): T[] {
+export function useReactive<T>(type: string, data: T[] | string[] | number[]): T[] {
   const store = useMicroStore();
   const schema = store?.getSchema(type);
   const pk = store?.getPrimaryKey(type);
@@ -72,7 +83,7 @@ export function useReactive<T>(type: string, data: T[]): T[] {
   const effectiveTransformer = transformer ? transformer.deserialize : (x: any) => x;
   const returnData: T[] = [];
   data.forEach((item: any) => {
-    const identifier = item[pk];
+    const identifier = directIds.has(typeof item) ? item : item[pk];
     const possibleRow = rows[identifier];
     if (possibleRow) {
       const thing: any = store?.deserialize(possibleRow, schema);
