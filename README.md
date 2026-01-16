@@ -1,6 +1,6 @@
 # MicroStore
 
-![MicroStore Logo](./logo.png)
+![MicroStore Logo](https://github.com/black-cape/microstore/raw/refs/heads/main/logo.png)
 
 **A powerful TypeScript React data normalization library that provides a single source of truth for your application state.**
 
