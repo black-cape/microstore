@@ -1,3 +1,7 @@
+### [0.0.5]
+
+- Update `.peekRecord` to only return records with at least one field set, otherwise return `undefined`
+
 ### [0.0.4]
 
 - Remove numeric primary keys as an option from `useReactive`, as the underlying `tinybase` data constructs don't actually index with numbers (uses string)

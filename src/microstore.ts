@@ -178,21 +178,21 @@ export class MicroStore {
     }
   }
 
-  peekRecord<T>(type: string, id: string): T | undefined {
+  peekRecord<T>(type: string, id: string) {
     const schema = this.getSchema(type);
     const pk = this.getPrimaryKey(type);
     const transformer = this.getRecordTransform(type);
     const effectiveTransformer = transformer ? transformer.deserialize : (x: any) => x;
     if (schema && pk) {
       const row = this.getStore().getRow(type, id);
-      if (row) {
-        return effectiveTransformer(this.deserialize(row, schema));
+      if (Object.keys(row).length) {
+        return effectiveTransformer(this.deserialize(row, schema)) as T;
       }
     }
     return undefined;
   }
 
-  peekAll<T>(type: string): T[] {
+  peekAll<T>(type: string) {
     const schema = this.getSchema(type);
     const pk = this.getPrimaryKey(type);
     const transformer = this.getRecordTransform(type);
@@ -204,10 +204,10 @@ export class MicroStore {
         return thing as T;
       });
     }
-    return [];
+    return [] as T[];
   }
 
-  unloadRecord<T>(type: string, id: string): T | undefined {
+  unloadRecord<T>(type: string, id: string) {
     const record = this.peekRecord<T>(type, id);
     if (record) {
       this.getStore().delRow(type, id);
