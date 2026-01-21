@@ -235,7 +235,7 @@ Transform data at the field level during serialization/deserialization:
 ```typescript
 const customTransforms = {
   date: {
-    serialize: (value: Date) => value.toISOString(),
+    serialize: (value: string) => value, // field transforms receive a value in REST payload / POJO format. (No complex types)
     deserialize: (value: string) => new Date(value)
   },
   currency: {
@@ -438,9 +438,9 @@ const baseTinyBaseSchemas = schematizer.getTablesSchema();
 // Define custom field transforms for complex types
 const customFieldTransforms = {
   date: {
-    // serialize: convert Date object to ISO string for TinyBase storage
-    serialize: (value: Date) => value.toISOString(),
-    // deserialize: convert ISO string back to Date object for application use
+    // serialize: Receives string value from POJO (complex date instances cant cross the wire), must be converted to simple type for Tinybase
+    serialize: (value: string) => value,
+    // deserialize: Coming OUT of Tinybase, convert ISO string back to Date object for application use
     deserialize: (value: string) => new Date(value)
   }
 };
@@ -481,7 +481,7 @@ const store = new MicroStore({
           name: user.name,
           age: user.age,
           isActive: user.isActive,
-          createdAt: user.createdAt, // Date object - will be converted by field transform
+          createdAt: user.createdAt.toISOString(), // Date object - need convert back to string to match a REST payload state
           preferences: user.preferences,
           tags: user.tags
         };
